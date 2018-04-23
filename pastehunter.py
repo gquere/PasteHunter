@@ -74,9 +74,14 @@ def paste_scanner():
         logging.debug("Found New {0} paste {1}".format(paste_data['pastesite'], paste_data['pasteid']))
         # get raw paste and hash them
         raw_paste_uri = paste_data['scrape_url']
-        raw_paste_data = requests.get(raw_paste_uri).text
-        # Process the paste data here
+        try:
+            raw_paste_data = requests.get(raw_paste_uri).text
+        except Exception as e:
+            logging.error("Unable to get {0} - {1}".format(raw_paste_uri, e))
+            q.task_done()
+            continue
 
+        # Process the paste data here
         try:
             # Scan with yara
             matches = rules.match(data=raw_paste_data)
